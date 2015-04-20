@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <row>
+        <col1>
+            &quot;,&quot;
+        </col1>
+    </row>
+    <row>
+        <col1>
+            a&quot;&quot;b
+        </col1>
+        <col2>
+            &quot;&quot;
+        </col2>
+    </row>
+</root>

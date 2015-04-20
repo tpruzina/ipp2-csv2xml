@@ -1,0 +1,6 @@
+usage: csv.py [--input [INPUT]] [--output [OUTPUT]] [--help] [-n]
+              [-r ROOT_ELEMENT] [-s SEPARATOR] [-h [SUBST]]
+              [-c COLUMN_ELEMENT] [-l LINE_ELEMENT] [-i INDEX]
+              [--start START_N] [--error-recovery]
+              [--missing-field MISSING_FIELD] [--padding] [--validate]
+csv.py: error: argument -i: expected one argument
