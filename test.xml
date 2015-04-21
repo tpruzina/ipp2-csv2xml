@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <row>
-    <col1>
-        zkouska csv,formatu,se tremi sloupci
-    </col1>
+    <Jméno>
+        Zbyněk
+    </Jméno>
+    <Přijkjkmení>
+        Křivka
+    </Přijkjkmení>
+    <Kontakt3>
+        chybi
+    </Kontakt3>
 </row>
 <row>
-    <col1>
-        znaky kolem carek , se nevynechavaji, diakritiku.zatim
-    </col1>
-</row>
-<row>
-    <col1>
-        posledni radek neni ukoncen, odradkovanim, tedy neni tu znak \r\n
-    </col1>
+    <Jméno>
+        Dušan
+    </Jméno>
+    <Přijkjkmení>
+        Kolář
+    </Přijkjkmení>
+    <Město>
+        Brno
+    </Město>
+    <Kontakt4>
+        kolar@fit.vutbr.cz
+    </Kontakt4>
+    <Kontakt5>
+        +420 54114-1238
+    </Kontakt5>
 </row>

@@ -99,6 +99,8 @@ class csv2xml:
             # cc = column counter
             cc = 1
             
+            #print(row)
+            
             #column loop
             for col in row:
 #                 print(row)
@@ -109,6 +111,8 @@ class csv2xml:
                     elif opts.all_collumns == True:
                         col_name = '{:s}{:d}'.format(opts.column_element, cc)
                         
+                    #print(col_name, cc)
+                        
                     output_xml += '{:s}<{:s}>\n'.format(self.indent(ic+1), col_name)
                     output_xml += self.convert_metacharacters('{:s}{:s}\n'.format(self.indent(ic+2), col))
                     output_xml += '{:s}</{:s}>\n'.format(self.indent(ic+1), col_name)
@@ -118,9 +122,14 @@ class csv2xml:
             # insert extra empty columns if recovery is enabled
             if opts.all_collumns == True:
                 for x in range(cc, nr_cols+1):
-                    output_xml += '{:s}<{:s}{:d}>\n'.format(self.indent(ic+1), opts.column_element, x)
+                    if cc <= nr_cols:
+                        insert_column = col_names[cc-1]
+                    else:
+                        insert_column = '{:s}{:d}'.format(opts.column_element, x)
+
+                    output_xml += '{:s}<{:s}>\n'.format(self.indent(ic+1), insert_column)
                     output_xml += self.convert_metacharacters('{:s}{:s}\n'.format(self.indent(ic+2), opts.missing_field))
-                    output_xml += '{:s}</{:s}{:d}>\n'.format(self.indent(ic+1), opts.column_element, x)
+                    output_xml += '{:s}</{:s}>\n'.format(self.indent(ic+1), insert_column)
             
             
             output_xml += '{:s}</{:s}>\n'.format(self.indent(ic), opts.line_element)
