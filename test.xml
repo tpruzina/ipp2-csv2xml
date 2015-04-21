@@ -1,34 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <row>
-	<col1>
-		zkouska csv
-	</col1>
-	<col2>
-		formatu
-	</col2>
-	<col3>
-		se tremi sloupci
-	</col3>
+    <col1>
+        zkouska csv,formatu,se tremi sloupci
+    </col1>
 </row>
 <row>
-	<col1>
-		znaky kolem carek 
-	</col1>
-	<col2>
-		 se nevynechavaji
-	</col2>
-	<col3>
-		 diakritiku.zatim;neresim
-	</col3>
+    <col1>
+        znaky kolem carek , se nevynechavaji, diakritiku.zatim
+    </col1>
 </row>
 <row>
-	<col1>
-		posledni radek neni ukoncen
-	</col1>
-	<col2>
-		 odradkovanim
-	</col2>
-	<col3>
-		 tedy neni tu znak \r\n
-	</col3>
+    <col1>
+        posledni radek neni ukoncen, odradkovanim, tedy neni tu znak \r\n
+    </col1>
 </row>

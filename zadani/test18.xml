@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<row>
+    <Jméno>
+        Zbyněk
+    </Jméno>
+    <Přijkjkmení>
+        Křivka
+    </Přijkjkmení>
+    <Kontakt3>
+        chybí
+    </Kontakt3>
+</row>
+<row>
+    <Jméno>
+        Dušan
+    </Jméno>
+    <Přijkjkmení>
+        Kolář
+    </Přijkjkmení>
+    <Město>
+        Brno
+    </Město>
+    <Kontakt4>
+        kolar@fit.vutbr.cz
+    </Kontakt4>
+    <Kontakt5>
+        +420 54114-1238
+    </Kontakt5>
+</row>
