@@ -167,6 +167,7 @@ class csv2xml:
         s = s.replace(">", "&gt;")
 #         s = s.replace("\'", "&apos;")
         s = s.replace('\"', "&quot;")
+        s = s.replace('\r', '')
         return s
 
     def n_char_padding_required(self, number):
