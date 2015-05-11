@@ -1,15 +1,16 @@
 #!/bin/env python3.2
 # -*- coding: utf-8 -*-
+#CSV:xpruzi01
 
 import argparse, sys
 import _csv as csv_sys
 import re
 import copy
 
+#main class
 class csv2xml:    
     global opts
     global header
-    global ret
     global input_csv
     global output_xml
     
@@ -17,11 +18,13 @@ class csv2xml:
     global pad_cols
     
     def __init__(self):
-        self.ret = 0
         self.header = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        
+        #parse commandline
         self.opts = self.parse_cmdline()
-                        
-        ret = self.csv2xml(self.opts)
+        
+        # execute conversion
+        self.csv2xml(self.opts)
 
         return
     
@@ -38,26 +41,30 @@ class csv2xml:
     # PREPARSING
         # we are gonna be parsing twice, make a shallow copy of memory backed file
         tmp = copy.copy(self.opts.input)
-        tmp_csv = csv_sys.reader(tmp,delimiter=self.opts.separator, quotechar='"')
         
-        self.pad_cols = []
+        try:
+            tmp_csv = csv_sys.reader(tmp,delimiter=self.opts.separator, quotechar='"')
         
-        for row in tmp_csv:
-            if nr_cols == 0:
-                nr_cols = len(row)
+            self.pad_cols = []
             
-            #if all columns are defined, take bigger of number of columns on a row and
-            # number of columns on first row of CSV
-            if opts.all_collumns == True:
-                self.pad_cols.append(self.n_char_padding_required(max(len(row), nr_cols)))
-            # otherwise try to get minimal value
-            else:
-                self.pad_cols.append(self.n_char_padding_required(min(len(row), nr_cols)))         
-            nr_lines += 1
-        
-        # calculate number of digits required to pad lines (only used if --pading was specified)
-        self.pad_lines = self.n_char_padding_required(nr_lines)
-        
+            for row in tmp_csv:
+                if nr_cols == 0:
+                    nr_cols = len(row)
+                
+                #if all columns are defined, take bigger of number of columns on a row and
+                # number of columns on first row of CSV
+                if opts.all_collumns == True:
+                    self.pad_cols.append(self.n_char_padding_required(max(len(row), nr_cols)))
+                # otherwise try to get minimal value
+                else:
+                    self.pad_cols.append(self.n_char_padding_required(min(len(row), nr_cols)))         
+                nr_lines += 1
+            
+            # calculate number of digits required to pad lines (only used if --pading was specified)
+            self.pad_lines = self.n_char_padding_required(nr_lines)
+        except csv_sys.Error:
+            self.error("invalid input file format", 4)
+            
         #cleanup
         del tmp_csv
         del tmp
@@ -75,8 +82,7 @@ class csv2xml:
         
         #ROOT ELEMENT
         if opts.root_element != None:
-            if (None != re.match('[^\w:_.].*$', opts.root_element)) or (None != re.match('^[0-9].*$', opts.root_element)) or (None != re.match('[^\w:_.].*$', opts.root_element)):
-                self.error("error 30: invalid root element <"+opts.root_element, 30)
+            self.validate_xml_root_tag(opts.root_element)
                 
             output_xml += '<{:s}>\n'.format(opts.root_element)
             ic += 1
@@ -87,17 +93,22 @@ class csv2xml:
             nr_lines -= 1   #since we ignore first line, decrease this counter
             col_names = next(input_csv)
             
+            if len(col_names) == 0:
+                self.error("first line cannot be empty if -h was specified!", 31)
+            
             col_names = [s.replace(' ', opts.subst) for s in col_names]
             col_names = [s.replace(',', opts.subst) for s in col_names]
             col_names = [s.replace('\n', opts.subst) for s in col_names]
             col_names = [s.replace('\r', opts.subst) for s in col_names]
             
+        
+        #prepare column names into array so they don't have to be generated inside loop
         if opts.subst == None: 
             col_names = []
             for x in range(1, nr_cols+3):
                 col_names.append('{:s}{:d}'.format(opts.column_element, x))
         
-        # check for invalid values
+        # check for invalid values in prepared column fields
         for x in col_names:
             if None != re.match('[^\w:_.].*$', x):
                 self.error("error 31: invalid element <"+x, 31)
@@ -163,9 +174,7 @@ class csv2xml:
             
         print(output_xml, end='', file=opts.output)
         
-        
-        
-        
+
         return 0
     
     # returns formatted string " indexN"
@@ -177,8 +186,6 @@ class csv2xml:
             s = ''
         return s
 
-    def validate(self):
-        return 0
     
     def indent(self, n):
         #str = '\t' * n
@@ -214,7 +221,7 @@ class csv2xml:
         args = argparse.ArgumentParser(add_help=False)
 
         # add arguments for all the options
-        args.add_argument('--help', action='help')
+        args.add_argument('--help', action='store_true', default=False, dest='help')
         args.add_argument('--input', dest='input', help='Input file with UTF-8 formatted CSV data')
         args.add_argument('--output', dest='output', help='Output file (XML data)')
         args.add_argument('-n', action='store_true', default=False, dest='n_switch', help='Don\'t generate XML header onto output')
@@ -228,15 +235,36 @@ class csv2xml:
         args.add_argument('--error-recovery', '-e', action='store_true', default=False, dest='error_recovery')
         args.add_argument('--all-columns', action='store_true', dest='all_collumns', default=False, help='don\'t ignore extra columns in recovery mode')
         args.add_argument('--missing-field', action='store', dest='missing_field', help='missing field filler')
-        args.add_argument('--padding', action='store_true', default=False, dest='padding', help='Provide compact output')
-        args.add_argument('--validate', action='store_true', default=False, dest='validate', help='Validate input CSV')
-        
+        args.add_argument('--padding', action='store_true', default=False, dest='padding', help='Provide compact output')        
         # execute parsing
         res = args.parse_args()
         
+        #fix all interdependencies
+        if res.help == True:
+            if len(sys.argv) == 2:
+                args.print_help()
+                sys.exit(0)
+            else:
+                self.error("--help expects it to be only argument given.", 1)
+        
+        if res.index == True and res.line_element == None:
+            self.error("-i must come with -l", 1)
+
+        if res.start_n != None:
+            if res.index == False or res.line_element == None:
+                self.error("--start=n requires -i, -l", 1)
+        
+        #don't allow multiple arguments of same thing
+        argcopy = []
+        for s in sys.argv:
+            argcopy.append(re.sub('--error-recovery', '-e', re.sub('\=.*$','', s)))
+        if len(argcopy) != len(set(argcopy)):
+            self.error("argument given more than once", 1)
+        
+        
         # -r=root-element
         if res.root_element != None:
-            self.validate_xml_tag(res.root_element)
+            self.validate_xml_root_tag(res.root_element)
 
         # -s=separator
         if res.separator == None:
@@ -249,13 +277,13 @@ class csv2xml:
         # -h=subst
         if res.subst != None:
             pass    #todo checking
-
-            
+ 
         # -c=column-element
         if res.column_element == None:
             res.column_element = 'col'
         else:
-            self.validate_xml_tag(res.column_element)
+            pass
+            #self.validate_xml_col_tag(res.column_element)
         
         # -start=n
         if res.start_n == None:
@@ -274,7 +302,7 @@ class csv2xml:
         if res.line_element == None:
             res.line_element = 'row'
         else:
-            self.validate_xml_tag(res.line_element)
+            self.validate_xml_line_tag(res.line_element)
            
         
         if res.missing_field != None:
@@ -291,6 +319,8 @@ class csv2xml:
             if res.error_recovery == False:
                 self.error('--all-columns only allowed together with --eror-recovery!', 1)
                 
+                
+        # open input file & load it into memory
         if res.input == None:
             res.input = sys.stdin
         else:
@@ -298,7 +328,10 @@ class csv2xml:
                 res.input = open(res.input, mode='r', newline='', encoding='utf-8')
             except IOError:
                 self.error("couldn't open file for reading", 2)
-            
+        
+        res.input = res.input.readlines()
+
+        #open output file
         if res.output == None:
             res.output = sys.stdout
         else:
@@ -307,18 +340,35 @@ class csv2xml:
             except IOError:
                 self.error("couldn't open file for writing", 3)
             
-        res.input = res.input.readlines()
-            
+        #return parser object with values    
         return res
     
-    def validate_xml_tag(self, s):
+    def validate_xml_root_tag(self,s):
+        if  None != re.match('^[^\w:_].*$', s)  or \
+            None != re.match('^[0-9].*$', s)    or \
+            None != re.match('[^\w:_\.\-]', s)  :
+                self.error("error 30: invalid root element <"+s, 30)
+        return
         
-        #self.error("Invalid XML tag", 30)
-        return True
+    def validate_xml_line_tag(self, s):
+        if  None != re.match('^[^\w:_].*$',s)   or \
+            None != re.match('^[0-9].*$', s)    or \
+            None != re.match('[^\w:_\.\-]', s)  :
+                self.error("error 30: invalid element <"+opts.root_element, 30)
+        return
+    
+    # todo: implement & rewrite in csv2xml()
+    def validate_xml_col_tag(self,s):
+        if  None != re.match('^[^\w:_].*$',s)   or \
+            None != re.match('^[0-9].*$', s)    or \
+            None != re.match('[^\w:_\.\-]', s)  :
+                self.error("error 30: invalid element <"+opts.root_element, 30)
+        return
     
     def error(self, msg, ret=-1):
         print(msg, file=sys.stderr)
         sys.exit(ret)
 
-c2x = csv2xml()
-exit(c2x.ret)
+if __name__ == "__main__":
+    c2x = csv2xml()
+    exit(0)
